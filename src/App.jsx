@@ -8,7 +8,7 @@ import MemoryTest from './pages/tests/MemoryTest';
 import AttentionTest from './pages/tests/AttentionTest';
 import FocusTest from './pages/tests/FocusTest';
 import ReactionTest from './pages/tests/ReactionTest';
-// import ProblemTest from './pages/tests/ProblemTest';
+import ProblemTest from './pages/tests/ProblemTest';
 
 function App() {
   return (
@@ -22,6 +22,7 @@ function App() {
           <Route path="/test/attention/:testId" element={<AttentionTest />} />
           <Route path="/test/focus/:testId" element={<FocusTest />} />
           <Route path="/test/reactionTime/:testId" element={<ReactionTest />} />
+          <Route path="/test/problemSolving/:testId" element={<ProblemTest />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
