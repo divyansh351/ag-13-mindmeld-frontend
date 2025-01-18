@@ -54,5 +54,12 @@ export const userService = {
     updateSkills: async (skillData) => {
         const response = await api.put('/api/users/skills', skillData);
         return response.data;
+    },
+
+
+    updateStats: async (statsData) => {
+        console.log(statsData)
+        const response = await api.post('/api/users/stats', statsData);
+        return response.data;
     }
 };

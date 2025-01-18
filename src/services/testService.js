@@ -47,21 +47,22 @@ export const testService = {
     },
 
     // Reaction Tests
-    getReactionTest: async (testId) => {
-        const response = await api.get(`/api/tests/reaction/${testId}`);
-        return response.data;
-    },
+    // getReactionTest: async (testId) => {
+    //     const response = await api.get(`/api/tests/reaction/${testId}`);
+    //     return response.data;
+    // },
 
     submitReactionTest: async (testId, data) => {
-        const response = await api.post(`/api/tests/reaction/${testId}/submit`, data);
+        console.log(data);
+        const response = await api.post(`/api/users/reaction/submit`, data);
         return response.data;
     },
 
     // Problem Tests
-    getProblemTest: async (testId) => {
-        const response = await api.get(`/api/tests/problem/${testId}`);
-        return response.data;
-    },
+    // getProblemTest: async (testId) => {
+    //     const response = await api.get(`/api/tests/problem/${testId}`);
+    //     return response.data;
+    // },
 
     submitProblemTest: async (testId, data) => {
         const response = await api.post(`/api/tests/problem/${testId}/submit`, data);

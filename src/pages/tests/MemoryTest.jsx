@@ -11,6 +11,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SendIcon from '@mui/icons-material/Send';
 import TestLayout from './shared/TestLayout';
 import { testService } from '../../services/testService';
+import { userService } from '../../services/api';
 
 const StyledCard = styled(Card)(({ theme }) => ({
     padding: theme.spacing(3),
@@ -103,10 +104,11 @@ const MemoryTest = () => {
     const handleSubmitTest = async () => {
         setIsSubmitting(true);
         try {
-            await testService.submitMemoryTest('memory-test', {
-                score,
-                difficulty,
-                attempts
+            console.log(score);
+            await userService.updateStats({
+                testType: 'memory',
+                score: score,
+                time: new Date().getTime()
             });
             navigate('/dashboard');
         } catch (error) {
