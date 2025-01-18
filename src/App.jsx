@@ -21,7 +21,7 @@ function App() {
           <Route path="/test/memory/:testId" element={<MemoryTest />} />
           <Route path="/test/attention/:testId" element={<AttentionTest />} />
           <Route path="/test/focus/:testId" element={<FocusTest />} />
-          <Route path="/test/reaction/:testId" element={<ReactionTest />} />
+          <Route path="/test/reactionTime/:testId" element={<ReactionTest />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

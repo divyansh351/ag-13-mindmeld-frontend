@@ -25,14 +25,40 @@ const Login = () => {
             await authService.login(formData);
             navigate('/dashboard');
         } catch (err) {
-            console.log(err)
+            console.log(err);
             setError('Invalid credentials');
         }
     };
 
     return (
-        <Container component="main" maxWidth="xs">
-            <Paper elevation={3} sx={{ mt: 8, p: 4, borderRadius: 2 }}>
+        <Container
+            component="main"
+            sx={{
+                position: 'relative',
+                height: '100vh', // Full viewport height
+                width: '100vw',  // Full viewport width
+                backgroundImage: 'url(/login-bg.png)', // Background image path
+                backgroundSize: 'cover', // Ensure the image covers the entire container
+                backgroundPosition: 'center', // Center the image
+                backgroundRepeat: 'no-repeat', // Prevent tiling
+                display: 'flex',
+                justifyContent: 'center', // Horizontally center
+                alignItems: 'center', // Vertically center
+                overflow: 'hidden', // Prevent scrollbars if any
+                backdropFilter: 'blur(10px)', // Optional blur effect
+            }}
+        >
+            <Paper
+                elevation={3}
+                sx={{
+                    padding: 4,
+                    borderRadius: 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Transparent form background
+                    boxShadow: 3,
+                    width: '100%',
+                    maxWidth: 400, // Max width for the form
+                }}
+            >
                 <Typography component="h1" variant="h4" align="center" gutterBottom>
                     Welcome Back!
                 </Typography>
@@ -79,6 +105,7 @@ const Login = () => {
             </Paper>
         </Container>
     );
+    
 };
 
 export default Login;

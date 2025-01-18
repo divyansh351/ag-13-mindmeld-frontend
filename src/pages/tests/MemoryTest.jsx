@@ -1,87 +1,268 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
-    Grid,
-    Card,
-    CardContent,
+    Grid, Card, Button, TextField, Select, MenuItem, Typography,
+    Box, CircularProgress, Dialog, DialogTitle, DialogContent,
+    DialogActions
 } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import SendIcon from '@mui/icons-material/Send';
 import TestLayout from './shared/TestLayout';
-import Timer from './shared/Timer';
 import { testService } from '../../services/testService';
 
+const StyledCard = styled(Card)(({ theme }) => ({
+    padding: theme.spacing(3),
+    margin: theme.spacing(2, 0),
+    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+    borderRadius: '12px'
+}));
+
+const NumberDisplay = styled(Typography)(({ theme }) => ({
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    letterSpacing: '0.5rem',
+    textAlign: 'center',
+    padding: theme.spacing(4)
+}));
+
+const ButtonGroup = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    gap: theme.spacing(2),
+    marginTop: theme.spacing(3),
+    [theme.breakpoints.down('sm')]: {
+        flexDirection: 'column'
+    }
+}));
+
 const MemoryTest = () => {
-    const { testId } = useParams();
     const navigate = useNavigate();
-    const [test, setTest] = useState(null);
-    const [pairs, setPairs] = useState([]);
-    const [selected, setSelected] = useState([]);
-    const [matched, setMatched] = useState([]);
-    const [showingCards, setShowingCards] = useState(true);
+    const [difficulty, setDifficulty] = useState('easy');
+    const [numbers, setNumbers] = useState([]);
+    const [showNumbers, setShowNumbers] = useState(false);
+    const [userInputs, setUserInputs] = useState(['', '', '']);
+    const [score, setScore] = useState(0);
+    const [attempts, setAttempts] = useState(0);
+    const [timeLeft, setTimeLeft] = useState(10);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
+    const [lastAttemptCorrect, setLastAttemptCorrect] = useState(false);
+
+    const difficultySettings = {
+        easy: { digits: 4, count: 3 },
+        medium: { digits: 5, count: 3 },
+        hard: { digits: 7, count: 3 }
+    };
 
     useEffect(() => {
-        const fetchTest = async () => {
-            const data = await testService.getMemoryTest(testId);
-            setTest(data);
-            setPairs(shuffleArray([...data.content.pairs, ...data.content.pairs]));
-        };
-        fetchTest();
-    }, [testId]);
+        let timer;
+        if (showNumbers && timeLeft > 0) {
+            timer = setInterval(() => {
+                setTimeLeft(prev => prev - 1);
+            }, 1000);
+        } else if (timeLeft === 0) {
+            setShowNumbers(false);
+        }
+        return () => clearInterval(timer);
+    }, [showNumbers, timeLeft]);
 
-    const handleCardClick = (index) => {
-        if (selected.length === 2) return;
-        if (selected.includes(index)) return;
-        if (matched.includes(index)) return;
+    const generateNumbers = () => {
+        const { digits } = difficultySettings[difficulty];
+        const min = Math.pow(10, digits - 1);
+        const max = Math.pow(10, digits) - 1;
+        const newNumbers = Array(3).fill(0).map(() => 
+            Math.floor(Math.random() * (max - min + 1) + min)
+        );
+        setNumbers(newNumbers);
+        setShowNumbers(true);
+        setUserInputs(['', '', '']);
+        setTimeLeft(10);
+    };
 
-        setSelected([...selected, index]);
+    const handleInputChange = (index, value) => {
+        const newInputs = [...userInputs];
+        newInputs[index] = value;
+        setUserInputs(newInputs);
+    };
 
-        if (selected.length === 1) {
-            if (pairs[selected[0]] === pairs[index]) {
-                setMatched([...matched, selected[0], index]);
-                setSelected([]);
-            } else {
-                setTimeout(() => setSelected([]), 1000);
-            }
+    const checkAnswers = () => {
+        const allCorrect = numbers.every((num, index) => 
+            num.toString() === userInputs[index]
+        );
+        if (allCorrect) {
+            setScore(score + 1);
+            setLastAttemptCorrect(true);
+        } else {
+            setLastAttemptCorrect(false);
+        }
+        setAttempts(attempts + 1);
+        setOpenModal(true);
+    };
+
+    const handleSubmitTest = async () => {
+        setIsSubmitting(true);
+        try {
+            await testService.submitMemoryTest('memory-test', {
+                score,
+                difficulty,
+                attempts
+            });
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('Error submitting test:', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
-    const handleComplete = async () => {
-        const score = (matched.length / pairs.length) * 100;
-        await testService.submitMemoryTest(testId, {
-            score,
-            timeTaken: test.content.duration - timeLeft
-        });
-        navigate('/dashboard');
-    };
-
-    if (!test) return null;
+    const ResultModal = () => (
+        <Dialog 
+            open={openModal} 
+            onClose={() => setOpenModal(false)}
+            maxWidth="sm"
+            fullWidth
+        >
+            <DialogTitle>
+                {lastAttemptCorrect ? "Correct! 🎉" : "Incorrect ❌"}
+            </DialogTitle>
+            <DialogContent>
+                <Typography variant="h6" gutterBottom>
+                    Current Score: {score}/{attempts}
+                </Typography>
+                <Box my={2}>
+                    <Typography variant="subtitle1">Correct Numbers:</Typography>
+                    <Typography variant="h5" color="primary">
+                        {numbers.join(' - ')}
+                    </Typography>
+                </Box>
+                <Box my={2}>
+                    <Typography variant="subtitle1">Your Input:</Typography>
+                    <Typography variant="h5" color={lastAttemptCorrect ? "success.main" : "error.main"}>
+                        {userInputs.join(' - ')}
+                    </Typography>
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button 
+                    onClick={() => {
+                        setOpenModal(false);
+                        generateNumbers();
+                    }}
+                    color="primary"
+                    variant="contained"
+                    disabled={attempts >= 10}
+                >
+                    Next Sequence
+                </Button>
+                <Button 
+                    onClick={handleSubmitTest}
+                    color="success"
+                    variant="contained"
+                    disabled={attempts === 0}
+                >
+                    Submit Test
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
 
     return (
-        <TestLayout
-            title="Memory Test"
-            description={test.description}
-        >
-            <Timer
-                duration={test.content.duration}
-                onComplete={handleComplete}
-            />
-            <Grid container spacing={2}>
-                {pairs.map((item, index) => (
-                    <Grid item xs={3} key={index}>
-                        <Card
-                            onClick={() => handleCardClick(index)}
-                            sx={{
-                                cursor: 'pointer',
-                                bgcolor: matched.includes(index) ? 'primary.light' :
-                                    selected.includes(index) ? 'secondary.light' : 'background.paper'
-                            }}
-                        >
-                            <CardContent>
-                                {(selected.includes(index) || matched.includes(index)) && item}
-                            </CardContent>
-                        </Card>
+        <TestLayout title="Memory Test">
+            <StyledCard>
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <Typography variant="h4" gutterBottom color="primary">
+                            Memory Challenge
+                        </Typography>
                     </Grid>
-                ))}
-            </Grid>
+
+                    <Grid item xs={12} md={6}>
+                        <Select
+                            fullWidth
+                            value={difficulty}
+                            onChange={(e) => setDifficulty(e.target.value)}
+                            disabled={showNumbers}
+                        >
+                            <MenuItem value="easy">Easy (4 digits)</MenuItem>
+                            <MenuItem value="medium">Medium (5 digits)</MenuItem>
+                            <MenuItem value="hard">Hard (7 digits)</MenuItem>
+                        </Select>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                            <Typography variant="h6" color="primary">
+                                Score: {score}/10
+                            </Typography>
+                            <Typography variant="h6" color="secondary">
+                                Attempts: {attempts}/10
+                            </Typography>
+                            {showNumbers && (
+                                <Typography variant="h6" color="error">
+                                    Time Remaining: {timeLeft}s
+                                </Typography>
+                            )}
+                        </Box>
+                    </Grid>
+
+                    {showNumbers ? (
+                        <Grid item xs={12}>
+                            <StyledCard>
+                                <NumberDisplay color="primary">
+                                    {numbers.join(' - ')}
+                                </NumberDisplay>
+                            </StyledCard>
+                        </Grid>
+                    ) : (
+                        <Grid item xs={12} container spacing={2}>
+                            {userInputs.map((input, index) => (
+                                <Grid item xs={12} md={4} key={index}>
+                                    <TextField
+                                        fullWidth
+                                        label={`Number ${index + 1}`}
+                                        variant="outlined"
+                                        value={input}
+                                        onChange={(e) => handleInputChange(index, e.target.value)}
+                                        disabled={attempts >= 10}
+                                        type="number"
+                                    />
+                                </Grid>
+                            ))}
+                        </Grid>
+                    )}
+
+                    <Grid item xs={12}>
+                        <ButtonGroup>
+                            {!showNumbers && (
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={generateNumbers}
+                                    disabled={attempts >= 10}
+                                    startIcon={<RefreshIcon />}
+                                    fullWidth
+                                >
+                                    Generate New Sequence
+                                </Button>
+                            )}
+                            {!showNumbers && (
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={checkAnswers}
+                                    disabled={attempts >= 10 || userInputs.some(input => !input)}
+                                    startIcon={<CheckCircleIcon />}
+                                    fullWidth
+                                >
+                                    Check Answers
+                                </Button>
+                            )}
+                        </ButtonGroup>
+                    </Grid>
+                </Grid>
+            </StyledCard>
+            <ResultModal />
         </TestLayout>
     );
 };
