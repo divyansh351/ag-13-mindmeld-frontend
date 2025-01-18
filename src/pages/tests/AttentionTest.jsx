@@ -10,14 +10,18 @@ import TestLayout from './shared/TestLayout';
 import { testService } from '../../services/testService';
 
 const StyledCard = styled(Card)(({ theme }) => ({
-    padding: theme.spacing(2),
-    margin: theme.spacing(1),
-    minHeight: '100px',
+    padding: theme.spacing(0.5),
+    margin: theme.spacing(0.5),
+    height: '60px',
+    width: '60px',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     cursor: 'pointer',
     transition: 'transform 0.2s',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backdropFilter: 'blur(10px)',
+    borderRadius: '8px',
     '&:hover': {
         transform: 'scale(1.02)',
     },
@@ -26,7 +30,13 @@ const StyledCard = styled(Card)(({ theme }) => ({
 const TestButton = styled(Button)(({ theme }) => ({
     margin: theme.spacing(1),
     padding: theme.spacing(2),
-    minWidth: '150px',
+    minWidth: '200px',
+    height: '50px',
+    backgroundColor: '#4CAF50',
+    color: '#FFFFFF',
+    '&:hover': {
+        backgroundColor: '#45A049',
+    },
 }));
 
 const WrapperBox = styled(Box)(({ theme }) => ({
@@ -35,8 +45,8 @@ const WrapperBox = styled(Box)(({ theme }) => ({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: theme.spacing(4),
-    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(2),
+    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
 }));
 
 const AttentionTest = () => {
@@ -62,30 +72,26 @@ const AttentionTest = () => {
                 return { items: newItems, target: oddPosition };
             },
         },
-       visualSearch: {
-    generateItems: () => {
-        const shapes = ['●', '■', '▲'];
-        const colors = {
-            Red: '#FF0000',
-            Blue: '#0000FF',
-            Green: '#00FF00'
-        };
-        const colorNames = Object.keys(colors);
-        // Ensure we have exactly 9 cards
-        const items = Array(8).fill(null).map(() => ({
-            shape: shapes[Math.floor(Math.random() * shapes.length)],
-            colorName: colorNames[Math.floor(Math.random() * colorNames.length)]
-        }));
-        // Add a target item
-        const target = {
-            shape: shapes[Math.floor(Math.random() * shapes.length)],
-            colorName: colorNames[Math.floor(Math.random() * colorNames.length)]
-        };
-        items.push(target); // Add target item
-        return { items: shuffle(items), target }; // Shuffle for randomness
-    },
-},
-
+        visualSearch: {
+            generateItems: () => {
+                const shapes = ['●', '■', '▲'];
+                const colors = {
+                    Red: '#FF0000',
+                    Blue: '#0000FF',
+                    Green: '#00FF00'
+                };
+                const colorNames = Object.keys(colors);
+                const items = Array(9).fill(null).map(() => ({
+                    shape: shapes[Math.floor(Math.random() * shapes.length)],
+                    colorName: colorNames[Math.floor(Math.random() * colorNames.length)]
+                }));
+                const target = {
+                    shape: shapes[Math.floor(Math.random() * shapes.length)],
+                    colorName: colorNames[Math.floor(Math.random() * colorNames.length)]
+                };
+                return { items: shuffle(items), target };
+            },
+        },
         numberMatching: {
             generateItems: () => {
                 const target = Math.floor(Math.random() * 9) + 1;
@@ -201,39 +207,40 @@ const AttentionTest = () => {
     };
 
     const renderTestSelection = () => (
-    <Grid container spacing={2} justifyContent="center" alignItems="center">
-        <Grid item xs={12}>
-            <Typography variant="h4" gutterBottom align="center">
-                Select Attention Test Type
-            </Typography>
-        </Grid>
-        {Object.keys(testConfigs).map((type) => (
-            <Grid item xs={12} sm={6} md={4} key={type} display="flex" justifyContent="center">
-                <TestButton
-                    variant="contained"
-                    color="primary"
-                    onClick={() => startTest(type)}
-                    fullWidth
-                >
-                    {type.split(/(?=[A-Z])/).join(' ')}
-                </TestButton>
+        <Grid container spacing={2} justifyContent="center">
+            <Grid item xs={12}>
+                <Typography variant="h5" gutterBottom align="center" sx={{ color: '#333' }}>
+                    Select Attention Test Type
+                </Typography>
             </Grid>
-        ))}
-    </Grid>
-);
-
+            {Object.keys(testConfigs).map((type) => (
+                <Grid item xs={12} sm={6} key={type}>
+                    <TestButton
+                        variant="contained"
+                        onClick={() => startTest(type)}
+                        fullWidth
+                    >
+                        {type === 'oddOneOut' && 'Odd One Out 🟦'}
+                        {type === 'visualSearch' && 'Visual Search 🔍'}
+                        {type === 'numberMatching' && 'Number Matching 🔢'}
+                        {type === 'letterCancellation' && 'Letter Cancellation 🔠'}
+                    </TestButton>
+                </Grid>
+            ))}
+        </Grid>
+    );
 
     const renderGame = () => (
-        <Box textAlign="center">
-            <Typography variant="h6" gutterBottom>
+        <Box textAlign="center" sx={{ maxWidth: '300px', margin: '0 auto' }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ color: '#333' }}>
                 Score: {score} | Time: {timeLeft}s
             </Typography>
-            <Typography variant="subtitle1" gutterBottom>
+            <Typography variant="body2" gutterBottom sx={{ color: '#333', mb: 1 }}>
                 {getTestInstructions()}
             </Typography>
-            <Grid container spacing={2} justifyContent="center">
+            <Grid container spacing={1} justifyContent="center">
                 {items.map((item, index) => (
-                    <Grid item xs={4} key={index}>
+                    <Grid item key={index}>
                         <StyledCard
                             onClick={() => handleItemClick(index)}
                             style={getItemStyle(item)}
@@ -291,11 +298,11 @@ const AttentionTest = () => {
                 };
                 return { 
                     color: colors[item.colorName],
-                    fontSize: '2rem'
+                    fontSize: '1.5rem'
                 };
             case 'numberMatching':
             case 'letterCancellation':
-                return { fontSize: '2rem' };
+                return { fontSize: '1.5rem' };
             default:
                 return {};
         }
