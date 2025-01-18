@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material';
 import { theme } from './theme/theme';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import TestList from './pages/TestList';
 import MemoryTest from './pages/tests/MemoryTest';
@@ -16,6 +17,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/tests" element={<TestList />} />
           <Route path="/test/memory/:testId" element={<MemoryTest />} />
