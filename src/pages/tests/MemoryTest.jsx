@@ -36,6 +36,16 @@ const ButtonGroup = styled(Box)(({ theme }) => ({
     }
 }));
 
+const WrapperBox = styled(Box)(({ theme }) => ({
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.spacing(2),
+    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+}));
+
 const MemoryTest = () => {
     const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState('easy');
@@ -168,102 +178,104 @@ const MemoryTest = () => {
     );
 
     return (
-        <TestLayout title="Memory Test">
-            <StyledCard>
-                <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                        <Typography variant="h4" gutterBottom color="primary">
-                            Memory Challenge
-                        </Typography>
-                    </Grid>
-
-                    <Grid item xs={12} md={6}>
-                        <Select
-                            fullWidth
-                            value={difficulty}
-                            onChange={(e) => setDifficulty(e.target.value)}
-                            disabled={showNumbers}
-                        >
-                            <MenuItem value="easy">Easy (4 digits)</MenuItem>
-                            <MenuItem value="medium">Medium (5 digits)</MenuItem>
-                            <MenuItem value="hard">Hard (7 digits)</MenuItem>
-                        </Select>
-                    </Grid>
-
-                    <Grid item xs={12}>
-                        <Box display="flex" justifyContent="space-between" alignItems="center">
-                            <Typography variant="h6" color="primary">
-                                Score: {score}/10
-                            </Typography>
-                            <Typography variant="h6" color="secondary">
-                                Attempts: {attempts}/10
-                            </Typography>
-                            {showNumbers && (
-                                <Typography variant="h6" color="error">
-                                    Time Remaining: {timeLeft}s
-                                </Typography>
-                            )}
-                        </Box>
-                    </Grid>
-
-                    {showNumbers ? (
+        <WrapperBox>
+            <TestLayout title="Memory Test">
+                <StyledCard>
+                    <Grid container spacing={3}>
                         <Grid item xs={12}>
-                            <StyledCard>
-                                <NumberDisplay color="primary">
-                                    {numbers.join(' - ')}
-                                </NumberDisplay>
-                            </StyledCard>
+                            <Typography variant="h4" gutterBottom color="primary">
+                                Memory Challenge
+                            </Typography>
                         </Grid>
-                    ) : (
-                        <Grid item xs={12} container spacing={2}>
-                            {userInputs.map((input, index) => (
-                                <Grid item xs={12} md={4} key={index}>
-                                    <TextField
-                                        fullWidth
-                                        label={`Number ${index + 1}`}
-                                        variant="outlined"
-                                        value={input}
-                                        onChange={(e) => handleInputChange(index, e.target.value)}
-                                        disabled={attempts >= 10}
-                                        type="number"
-                                    />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    )}
 
-                    <Grid item xs={12}>
-                        <ButtonGroup>
-                            {!showNumbers && (
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={generateNumbers}
-                                    disabled={attempts >= 10}
-                                    startIcon={<RefreshIcon />}
-                                    fullWidth
-                                >
-                                    Generate New Sequence
-                                </Button>
-                            )}
-                            {!showNumbers && (
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    onClick={checkAnswers}
-                                    disabled={attempts >= 10 || userInputs.some(input => !input)}
-                                    startIcon={<CheckCircleIcon />}
-                                    fullWidth
-                                >
-                                    Check Answers
-                                </Button>
-                            )}
-                        </ButtonGroup>
+                        <Grid item xs={12} md={6}>
+                            <Select
+                                fullWidth
+                                value={difficulty}
+                                onChange={(e) => setDifficulty(e.target.value)}
+                                disabled={showNumbers}
+                            >
+                                <MenuItem value="easy">Easy (4 digits)</MenuItem>
+                                <MenuItem value="medium">Medium (5 digits)</MenuItem>
+                                <MenuItem value="hard">Hard (7 digits)</MenuItem>
+                            </Select>
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Box display="flex" justifyContent="space-between" alignItems="center">
+                                <Typography variant="h6" color="primary">
+                                    Score: {score}/10
+                                </Typography>
+                                <Typography variant="h6" color="secondary">
+                                    Attempts: {attempts}/10
+                                </Typography>
+                                {showNumbers && (
+                                    <Typography variant="h6" color="error">
+                                        Time Remaining: {timeLeft}s
+                                    </Typography>
+                                )}
+                            </Box>
+                        </Grid>
+
+                        {showNumbers ? (
+                            <Grid item xs={12}>
+                                <StyledCard>
+                                    <NumberDisplay color="primary">
+                                        {numbers.join(' - ')}
+                                    </NumberDisplay>
+                                </StyledCard>
+                            </Grid>
+                        ) : (
+                            <Grid item xs={12} container spacing={2}>
+                                {userInputs.map((input, index) => (
+                                    <Grid item xs={12} md={4} key={index}>
+                                        <TextField
+                                            fullWidth
+                                            label={`Number ${index + 1}`}
+                                            variant="outlined"
+                                            value={input}
+                                            onChange={(e) => handleInputChange(index, e.target.value)}
+                                            disabled={attempts >= 10}
+                                            type="number"
+                                        />
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        )}
+
+                        <Grid item xs={12}>
+                            <ButtonGroup>
+                                {!showNumbers && (
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={generateNumbers}
+                                        disabled={attempts >= 10}
+                                        startIcon={<RefreshIcon />}
+                                        fullWidth
+                                    >
+                                        Generate New Sequence
+                                    </Button>
+                                )}
+                                {!showNumbers && (
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        onClick={checkAnswers}
+                                        disabled={attempts >= 10 || userInputs.some(input => !input)}
+                                        startIcon={<CheckCircleIcon />}
+                                        fullWidth
+                                    >
+                                        Check Answers
+                                    </Button>
+                                )}
+                            </ButtonGroup>
+                        </Grid>
                     </Grid>
-                </Grid>
-            </StyledCard>
-            <ResultModal />
-        </TestLayout>
+                </StyledCard>
+                <ResultModal />
+            </TestLayout>
+        </WrapperBox>
     );
 };
 
