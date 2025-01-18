@@ -10,6 +10,7 @@ import {
     LinearProgress,
 } from '@mui/material';
 import { testService } from '../../services/testService';
+import { userService } from '../../services/api';
 
 const CircleClickTest = () => {
     const [gameState, setGameState] = useState('IDLE');
@@ -77,10 +78,15 @@ const CircleClickTest = () => {
     const handleSubmit = async () => {
         try {
             setLoading(true);
-            await testService.submitReactionTest('reaction', {
-                scores,
-                averageTime: calculateAverageScore()
-            });
+              await userService.updateStats({
+                            testType: 'memory',
+                            score: calculateAverageScore(),
+                            time: new Date().getTime()
+                        });
+            // await testService.submitReactionTest('reaction', {
+            //     scores,
+            //     averageTime: calculateAverageScore()
+            // });
             setLoading(false);
         } catch (error) {
             console.error('Error submitting results:', error);
